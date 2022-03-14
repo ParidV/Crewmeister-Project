@@ -1,6 +1,12 @@
-<p align="center">
+# 🚀 First step (backend):
+
+- [ ] Go into the api folder
+- [ ] npm install -g json-server
+- [ ] Run command "json-server --watch json_files/index.js -p 4500"
+
+<!-- <p align="center">
   <img src="https://crewmeister.com/images/logo_crewmeister_without_text.svg" />
-</p>
+</p> -->
 
 # 🚀 Crewmeister coding challenge - Frontend (React)
 

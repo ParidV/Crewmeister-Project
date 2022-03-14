@@ -1,6 +1,5 @@
 {
-  "message": "Success",
-  "payload": [
+  "absences": [
     {
       "admitterId": null,
       "admitterNote": "",
