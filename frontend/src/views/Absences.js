@@ -1,17 +1,14 @@
 import React, { useState, useEffect } from "react";
-
 import DataTable from "react-data-table-component";
 import axios from "axios";
-import { Typography } from "@mui/material";
+import Typography from "@mui/material/Typography";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
-import Button from "@mui/material/Button";
-
-// Member name
-// Type of absence
-// Period
-// Member note (when available)
-// Status (can be 'Requested', 'Confirmed' or 'Rejected')
-// Admitter note (when available)
+import ICalendarLink from "react-icalendar-link";
+import DesktopDatePicker from "@mui/lab/DesktopDatePicker";
+import { TextField } from "@mui/material";
+import LocalizationProvider from "@mui/lab/LocalizationProvider";
+import AdapterDateFns from "@mui/lab/AdapterDateFns";
+import { Box } from "@mui/material";
 
 const columns = [
   {
@@ -46,9 +43,18 @@ const columns = [
   {
     name: "iCal",
     cell: (row) => (
-      <Button variant="contained" color="primary">
+      <ICalendarLink
+        event={{
+          title: `${row.type} Appointment by Mr/Mrs ${row.member}`,
+          description: `${row.admitterNote}`,
+          startTime: Date.parse(row.startDate),
+          endTime: Date.parse(row.endDate),
+          location: "Rosenheimer Str. 141 h, 81671 München, Germany",
+          attendees: [`${row.member} <${row.member}@world.com>`],
+        }}
+      >
         <CalendarMonthIcon />
-      </Button>
+      </ICalendarLink>
     ),
   },
 ];
@@ -57,6 +63,14 @@ function Absences() {
   const [pending, setPending] = useState(true);
   const [absencesData, setAbsencesData] = useState([]);
   const [sizeData, setSizeData] = useState(null);
+  const [startDate, setStartDate] = React.useState(null);
+  const [endDate, setEndDate] = React.useState(null);
+  const handleChangeStartDate = (newValue) => {
+    setStartDate(newValue);
+  };
+  const handleChangeEndDate = (newValue) => {
+    setEndDate(newValue);
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -90,15 +104,46 @@ function Absences() {
       console.log(error);
     }
   }, []);
+
   return (
     <>
       {sizeData ? (
-        <Typography variant="h6" gutterBottom>
-          Absences {sizeData}
-        </Typography>
+        <Box
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+          padding={2}
+        >
+          <Typography variant="h6" gutterBottom>
+            Absences in total <b>{sizeData}</b>
+          </Typography>
+        </Box>
       ) : (
         ""
       )}
+      <Box
+        display="flex"
+        alignItems="center"
+        justifyContent="center"
+        padding={2}
+      >
+        <LocalizationProvider dateAdapter={AdapterDateFns}>
+          <DesktopDatePicker
+            label="Start Date"
+            inputFormat="MM/dd/yyyy"
+            value={startDate}
+            onChange={handleChangeStartDate}
+            renderInput={(params) => <TextField {...params} />}
+          />
+          <DesktopDatePicker
+            label="End Date"
+            inputFormat="MM/dd/yyyy"
+            value={endDate}
+            onChange={handleChangeEndDate}
+            renderInput={(params) => <TextField {...params} />}
+          />
+        </LocalizationProvider>
+      </Box>
 
       <DataTable
         title="Absences"
