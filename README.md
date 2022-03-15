@@ -1,6 +1,6 @@
 # 🚀 First step (backend):
 
-- [ ] Go into the api folder
+- [ ] Change Directory to the api folder
 - [ ] npm install -g json-server
 - [ ] Run command "json-server --watch json_files/index.js -p 4500"
 

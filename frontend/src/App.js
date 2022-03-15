@@ -1,5 +1,5 @@
 import Navbar from "./components/Navbar";
-import { Routes, Route, useParams } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import Absences from "./views/Absences";
 import Members from "./views/Members";
 import Home from "./views/Home";
