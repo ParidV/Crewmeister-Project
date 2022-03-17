@@ -11,7 +11,6 @@ import Button from "@mui/material/Button";
 import MenuItem from "@mui/material/MenuItem";
 import StyledLink from "./StyledLink";
 
-
 const Navbar = () => {
   const [anchorElNav, setAnchorElNav] = React.useState(null);
   const [anchorElUser, setAnchorElUser] = React.useState(null);
@@ -83,11 +82,6 @@ const Navbar = () => {
                   <StyledLink to="/Absences">Absences</StyledLink>
                 </Typography>
               </MenuItem>{" "}
-              <MenuItem key="Members" onClick={handleCloseNavMenu}>
-                <Typography textAlign="center">
-                  <StyledLink to="/members">Members</StyledLink>
-                </Typography>
-              </MenuItem>
             </Menu>
           </Box>
           <Typography
@@ -112,13 +106,6 @@ const Navbar = () => {
               sx={{ my: 2, color: "white", display: "block" }}
             >
               <StyledLink to="/absences">Absences</StyledLink>
-            </Button>{" "}
-            <Button
-              key="Members"
-              onClick={handleCloseNavMenu}
-              sx={{ my: 2, color: "white", display: "block" }}
-            >
-              <StyledLink to="/members">Members</StyledLink>
             </Button>
           </Box>
         </Toolbar>

@@ -1,14 +1,25 @@
 import React, { useState, useEffect } from "react";
 import DataTable from "react-data-table-component";
 import axios from "axios";
-import Typography from "@mui/material/Typography";
+// Ical implementation
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import ICalendarLink from "react-icalendar-link";
+// Calendar Imports
 import DesktopDatePicker from "@mui/lab/DesktopDatePicker";
-import { TextField } from "@mui/material";
 import LocalizationProvider from "@mui/lab/LocalizationProvider";
 import AdapterDateFns from "@mui/lab/AdapterDateFns";
-import { Box } from "@mui/material";
+
+import { Box, Button, TextField, Typography } from "@mui/material";
+// Alert Components
+import MuiAlert from "@mui/material/Alert";
+import Snackbar from "@mui/material/Snackbar";
+
+import format from "date-fns/format";
+
+import InputLabel from "@mui/material/InputLabel";
+import MenuItem from "@mui/material/MenuItem";
+import FormControl from "@mui/material/FormControl";
+import Select from "@mui/material/Select";
 
 const columns = [
   {
@@ -32,7 +43,14 @@ const columns = [
   },
   {
     name: "Status",
-    selector: (row) => row.year,
+    selector: (row) =>
+      !row.confirmedAt && !row.rejectedAt
+        ? "Requested"
+        : row.confirmedAt && !row.rejectedAt
+        ? "Confirmed"
+        : !row.confirmedAt && row.rejectedAt
+        ? "Rejected"
+        : null,
     sortable: true,
   },
   {
@@ -59,43 +77,71 @@ const columns = [
   },
 ];
 
+const Alert = React.forwardRef(function Alert(props, ref) {
+  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+});
+
 function Absences() {
   const [pending, setPending] = useState(true);
   const [absencesData, setAbsencesData] = useState([]);
   const [sizeData, setSizeData] = useState(null);
   const [startDate, setStartDate] = React.useState(null);
   const [endDate, setEndDate] = React.useState(null);
+  const [isError, setIsError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [type, setType] = React.useState("");
+
+  const handleChange = (event) => {
+    setType(event.target.value);
+  };
   const handleChangeStartDate = (newValue) => {
-    setStartDate(newValue);
+    const formatedStartDate = format(newValue, "yyyy-MM-dd");
+    setStartDate(formatedStartDate);
   };
   const handleChangeEndDate = (newValue) => {
-    setEndDate(newValue);
+    const formatedEndDate = format(newValue, "yyyy-MM-dd");
+    setEndDate(formatedEndDate);
+  };
+
+  const clearCalendarFilter = async () => {
+    setStartDate(null);
+    setEndDate(null);
+    setType("");
   };
 
   useEffect(() => {
     const fetchData = async () => {
-      const absences = await axios(`http://localhost:4500/absences`);
-      const members = await axios(`http://localhost:4500/members`);
+      try {
+          const absences = await axios(`http://localhost:4500/absences`);
+          const members = await axios(`http://localhost:4500/members`);
 
-      let absences_data = [];
+        let absences_data = [];
 
-      const absences_array = absences.data.absences;
-      const members_array = members.data.members;
+        const absences_array = absences.data.absences;
+        const members_array = members.data.members;
 
-      absences_array.map((absence) => {
-        const member = members_array.find(
-          (member) => member.userId === absence.userId
-        );
-        const member_name = member.name;
+        absences_array.map((absence) => {
+          const member = members_array.find(
+            (member) => member.userId === absence.userId
+          );
+          const member_name = member.name;
 
-        absences_data.push({
-          ...absence,
-          member: member_name,
+          absences_data.push({
+            ...absence,
+            member: member_name,
+          });
         });
-      });
-      var size = Object.keys(absences_data).length;
-      size ? setSizeData(size) : setSizeData(null);
-      setAbsencesData(absences_data);
+        var size = Object.keys(absences_data).length;
+        size ? setSizeData(size) : setSizeData(null);
+        setAbsencesData(absences_data);
+
+        setErrorMessage("");
+        setIsError(false);
+      } catch (error) {
+        console.log(error);
+        setErrorMessage(error.message);
+        setIsError(true);
+      }
     };
     try {
       fetchData();
@@ -105,8 +151,27 @@ function Absences() {
     }
   }, []);
 
+  const filteredData = absencesData.filter((item) =>
+    !startDate && !endDate && !type
+      ? true
+      : !startDate && !endDate && type
+      ? item.type === type
+      : startDate && endDate && !type
+      ? item.startDate >= startDate && item.endDate <= endDate
+      : startDate && endDate && type
+      ? item.startDate >= startDate &&
+        item.endDate <= endDate &&
+        item.type === type
+      : true
+  );
+
   return (
     <>
+      <Snackbar open={isError} autoHideDuration={400}>
+        <Alert severity="error" sx={{ width: "100%" }}>
+          {errorMessage}
+        </Alert>
+      </Snackbar>
       {sizeData ? (
         <Box
           display="flex"
@@ -143,12 +208,47 @@ function Absences() {
             renderInput={(params) => <TextField {...params} />}
           />
         </LocalizationProvider>
+
+        {startDate && endDate && (
+          <Button
+            variant="contained"
+            color="error"
+            onClick={clearCalendarFilter}
+          >
+            Reset
+          </Button>
+        )}
       </Box>
 
+      <Box
+        display="flex"
+        alignItems="center"
+        justifyContent="center"
+        paddingBottom={2}
+      >
+        <FormControl sx={{ m: 1, minWidth: 120 }}>
+          <InputLabel id="demo-simple-select-helper-label">Type</InputLabel>
+          <Select
+            labelId="demo-simple-select-helper-label"
+            id="demo-simple-select-helper"
+            name="type"
+            fullWidth
+            value={type}
+            label="Type"
+            onChange={handleChange}
+          >
+            <MenuItem value="">
+              <em>None</em>
+            </MenuItem>
+            <MenuItem value={"sickness"}>sickness</MenuItem>
+            <MenuItem value={"vacation"}>vacation</MenuItem>
+          </Select>
+        </FormControl>
+      </Box>
       <DataTable
         title="Absences"
         columns={columns}
-        data={absencesData}
+        data={filteredData}
         progressPending={pending}
         pagination
       />
