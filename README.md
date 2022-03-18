@@ -13,7 +13,6 @@ There are two routes for the frontend:
 - [ ] Change Directory to the api folder
 - [ ] npm install -g json-server (Would probably run without running this command)
 - [ ] Run command "json-server --watch json_files/index.js -p 4500"
-- 
 
 # 🚀 Second step (frontend):
 
