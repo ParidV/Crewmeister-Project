@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import Box from "@mui/material/Box";
 import { Typography } from "@mui/material";
-import Link from "@mui/material/Link";
 import Button from "@mui/material/Button";
+import { Link } from "react-router-dom";
 function Home() {
   return (
     <Box
@@ -15,7 +15,7 @@ function Home() {
       <Typography variant="h4" gutterBottom>
         Crewmeister Project
       </Typography>
-      <Link href="/absences">
+      <Link to="/absences" style={{textDecoration:'None'}}>
         <Button variant="contained" color="primary">
           Absences
         </Button>
